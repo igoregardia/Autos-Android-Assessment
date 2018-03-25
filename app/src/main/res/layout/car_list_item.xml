@@ -9,8 +9,7 @@
         android:layout_width="80dp"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:layout_gravity="center"
-        android:src="@mipmap/ic_launcher" />
+        android:layout_gravity="center" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -25,7 +24,6 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Audi"
             android:textColor="@color/textColorPrimary"
             android:textSize="@dimen/text_size_normal" />
 
@@ -36,7 +34,6 @@
             android:textColor="@color/textColorSecondary"
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="asfasdafasdfsa sdaf  adfas dfggasdfdfgpsdsdf"
             android:textSize="@dimen/text_size_default" />
     </LinearLayout>
 
@@ -46,7 +43,6 @@
         android:layout_height="match_parent"
         android:gravity="center|end"
         android:layout_marginEnd="@dimen/margin_default"
-        android:text="76000.00€"
         android:textColor="@color/colorAccent"
         android:textSize="@dimen/text_size_large" />
 </LinearLayout>

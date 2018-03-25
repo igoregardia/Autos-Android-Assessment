@@ -3,24 +3,31 @@ package com.andrei.autos_android_assessment.domain.data.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by Andrei on 24/03/2018.
  */
+public class Car implements Parcelable {
 
-public class Car implements Parcelable{
-    // TODO: 24/03/2018 Explain why I chose Strings -> the JSON has all its values as Strings
-//    private String make;
-//    private String model;
-//    private Double price;
-//    private int year;
-//    private long km;
-//    private String pictureUrl;
-
+    @SerializedName("make")
+    @Expose
     private String make;
+    @SerializedName("model")
+    @Expose
     private String model;
+    @SerializedName("price")
+    @Expose
     private String price;
+    @SerializedName("year")
+    @Expose
     private String year;
+    @SerializedName("km")
+    @Expose
     private String km;
+    @SerializedName("picture")
+    @Expose
     private String pictureUrl;
 
     public Car() {

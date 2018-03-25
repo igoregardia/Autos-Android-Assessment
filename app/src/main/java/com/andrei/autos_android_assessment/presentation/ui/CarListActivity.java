@@ -2,68 +2,133 @@ package com.andrei.autos_android_assessment.presentation.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.andrei.autos_android_assessment.R;
+import com.andrei.autos_android_assessment.domain.data.DataManager;
 import com.andrei.autos_android_assessment.domain.data.model.Car;
+import com.andrei.autos_android_assessment.domain.data.prefrences.PreferencesHelper;
+import com.andrei.autos_android_assessment.presentation.presenters.CarListPresenter;
 import com.andrei.autos_android_assessment.presentation.ui.callbacks.OnItemClickListener;
-import com.squareup.picasso.Picasso;
+import com.andrei.autos_android_assessment.presentation.ui.generics.MvpActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Created by Andrei on 24/03/2018.
  */
 
-public class CarListActivity extends AppCompatActivity implements OnItemClickListener {
+public class CarListActivity extends MvpActivity<CarListPresenter> implements CarListView, OnItemClickListener {
 
-    private List<Car> mCarList;
+    @Inject
+    DataManager mDataManager;
+
+    private List<Car> mCars;
+    private RecyclerView mCarList;
+    private int mLayout;
+
+    public static final String CARS_CACHE = "cars_cache";
+    public static final String LAYOUT_CACHE = "layout_cache";
+
+
+    private DividerItemDecoration mItemDecor;
+    private CarListAdapter mListAdapter;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_car_list);
+        getActivityComp().inject(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.title_activity_car_list);
         setSupportActionBar(toolbar);
 
-        RecyclerView mCarList = findViewById(R.id.car_list_rw);
-
-
-        // TODO: 24/03/2018 remove this
-        setupTestList();
-
-        CarListAdapter adapter = new CarListAdapter(this.mCarList, this);
-        mCarList.setAdapter(adapter);
-        mCarList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-
-        DividerItemDecoration itemDecor = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
-        itemDecor.setDrawable(getResources().getDrawable(R.drawable.list_item_divider));
-        mCarList.addItemDecoration(itemDecor);
-
-
+        mCarList = findViewById(R.id.car_list_rw);
     }
 
-    // TODO: 24/03/2018 remove this
-    private void setupTestList() {
-        mCarList = new ArrayList<>();
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        if (savedInstanceState == null || !savedInstanceState.containsKey(CARS_CACHE)) {
+            mPresenter.loadCars();
+            mPresenter.loadLayout();
+        } else {
+            mCars = savedInstanceState.getParcelableArrayList(CARS_CACHE);
+            mLayout = savedInstanceState.getInt(LAYOUT_CACHE);
+            setupList();
+        }
+    }
 
-        mCarList.add(new Car("Mercedes-Benz", "A 180", "13600.00", "2017", "17000", "https://secure.pic.autoscout24.net/images-420x315/026/186/0339186026001.jpg?f3f3a7b0090d280007f6ec077b42b1d2"));
-        mCarList.add(new Car("Audi", "A1 1.6 TDI Sportback S tronic", "13600.00", "2017", "17000", "https://secure.pic.autoscout24.net/images-420x315/409/487/0340487409001.jpg?2ae5ec0b72c59be66c23cdfb060c460a"));
-        mCarList.add(new Car("Opel", "Corsa 1.3 CDTI Enjoy Start/Stop", "245000", "2017", "17000", "https://secure.pic.autoscout24.net/images-420x315/883/098/0339098883001.jpg?649620d232904569218eda9c94d216c8"));
-        mCarList.add(new Car("BMW", "530 Serie 5 (F10/F11) xDrive 249CV Touring Msport", "13600.00", "2017", "17000", "https://secure.pic.autoscout24.net/image-is-broken"));
+    @Override
+    public void onLoadCars(List<Car> cars) {
+        mCars = cars;
+        setupList();
+    }
+
+    @Override
+    public void onErrorLoadingCars(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onLoadLayout(int layout) {
+        mLayout = layout;
+    }
+
+    @Override
+    public void onLayoutChanged(int layout) {
+        mLayout = layout;
+        setupListLayout();
+    }
+
+    private void setupList() {
+        mListAdapter = new CarListAdapter(this.mCars, this);
+
+        mItemDecor = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        mItemDecor.setDrawable(getResources().getDrawable(R.drawable.list_item_divider));
+
+        setupListLayout();
+    }
+
+    private void setupListLayout() {
+        mListAdapter.setLayout(mLayout);
+        if (mLayout == PreferencesHelper.CAR_LIST_LAYOUT) {
+            mCarList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+            mCarList.addItemDecoration(mItemDecor);
+        } else {
+            mCarList.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
+            mCarList.removeItemDecoration(mItemDecor);
+        }
+        mCarList.setAdapter(mListAdapter);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mCars != null) {
+            outState.putParcelableArrayList(CARS_CACHE, (ArrayList<Car>) mCars);
+            outState.putInt(LAYOUT_CACHE, mLayout);
+        }
+    }
+
+    @NonNull
+    @Override
+    public CarListPresenter createPresenter() {
+        return new CarListPresenter(mDataManager);
     }
 
     @Override
@@ -74,71 +139,22 @@ public class CarListActivity extends AppCompatActivity implements OnItemClickLis
         overridePendingTransition(R.anim.anim_slide_in_left, R.anim.anim_slide_out_left);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.car_list_menu, menu);
+        return true;
+    }
 
-    private class CarListAdapter extends RecyclerView.Adapter<CarListAdapter.CarHolder> {
-
-        List<Car> mCarList;
-        OnItemClickListener mListener;
-
-        CarListAdapter(List<Car> mCarList, OnItemClickListener listener) {
-            this.mCarList = mCarList;
-            this.mListener = listener;
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_list:
+                if (mLayout == PreferencesHelper.CAR_LIST_LAYOUT)
+                    mPresenter.changeLayout(PreferencesHelper.CAR_GRID_LAYOUT);
+                else
+                    mPresenter.changeLayout(PreferencesHelper.CAR_LIST_LAYOUT);
+                return true;
         }
-
-        @Override
-        public CarHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new CarHolder(
-                    LayoutInflater.from(getApplicationContext())
-                            .inflate(R.layout.car_list_item, parent, false));
-        }
-
-        @Override
-        public void onBindViewHolder(CarHolder holder, int position) {
-            holder.bind(mCarList.get(position), mListener);
-        }
-
-        @Override
-        public int getItemCount() {
-            if (mCarList != null) {
-                return mCarList.size();
-            }
-            return 0;
-        }
-
-        class CarHolder extends RecyclerView.ViewHolder {
-            private ImageView mThumbnail;
-            private TextView mMake;
-            private TextView mModel;
-            private TextView mPrice;
-
-            CarHolder(View itemView) {
-                super(itemView);
-                mThumbnail = itemView.findViewById(R.id.car_img);
-                mMake = itemView.findViewById(R.id.car_make);
-                mModel = itemView.findViewById(R.id.car_model);
-                mPrice = itemView.findViewById(R.id.car_price);
-            }
-
-            void bind(final Car car, final OnItemClickListener listener) {
-                loadCarImage(car.getPictureUrl(), mThumbnail);
-                mMake.setText(car.getMake());
-                mModel.setText(car.getModel());
-                mPrice.setText(car.getPrice());
-
-                itemView.setOnClickListener(v -> listener.onItemClick(car));
-            }
-
-            void loadCarImage(String url, ImageView imageView) {
-                if (url.isEmpty()) {
-                    imageView.setImageResource(R.drawable.ic_car_placeholder_error);
-                } else {
-                    Picasso.get()
-                            .load(url)
-                            .placeholder(R.drawable.ic_car_placeholder)
-                            .error(R.drawable.ic_car_placeholder_error)
-                            .into(imageView);
-                }
-            }
-        }
+        return super.onOptionsItemSelected(item);
     }
 }

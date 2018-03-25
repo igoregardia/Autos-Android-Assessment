@@ -1,10 +1,13 @@
 package com.andrei.autos_android_assessment.domain.data.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Andrei on 24/03/2018.
  */
 
-public class Car {
+public class Car implements Parcelable{
     // TODO: 24/03/2018 Explain why I chose Strings -> the JSON has all its values as Strings
 //    private String make;
 //    private String model;
@@ -79,4 +82,40 @@ public class Car {
     public void setPictureUrl(String pictureUrl) {
         this.pictureUrl = pictureUrl;
     }
+
+    private Car(Parcel in) {
+        make = in.readString();
+        model = in.readString();
+        price = in.readString();
+        year = in.readString();
+        km = in.readString();
+        pictureUrl = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(make);
+        dest.writeString(model);
+        dest.writeString(price);
+        dest.writeString(year);
+        dest.writeString(km);
+        dest.writeString(pictureUrl);
+    }
+
+    public static final Parcelable.Creator<Car> CREATOR = new Parcelable.Creator<Car>() {
+        @Override
+        public Car createFromParcel(Parcel in) {
+            return new Car(in);
+        }
+
+        @Override
+        public Car[] newArray(int size) {
+            return new Car[size];
+        }
+    };
 }

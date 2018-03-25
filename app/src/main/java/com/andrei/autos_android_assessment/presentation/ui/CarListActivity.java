@@ -2,7 +2,6 @@ package com.andrei.autos_android_assessment.presentation.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +16,7 @@ import android.widget.TextView;
 import com.andrei.autos_android_assessment.R;
 import com.andrei.autos_android_assessment.domain.data.model.Car;
 import com.andrei.autos_android_assessment.presentation.ui.callbacks.OnItemClickListener;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +27,7 @@ import java.util.List;
 
 public class CarListActivity extends AppCompatActivity implements OnItemClickListener {
 
-    private RecyclerView mCarList;
-
-    // TODO: 24/03/2018 remove this list
-    List<Car> testList;
+    private List<Car> mCarList;
 
 
     @Override
@@ -42,13 +39,13 @@ public class CarListActivity extends AppCompatActivity implements OnItemClickLis
         toolbar.setTitle(R.string.title_activity_car_list);
         setSupportActionBar(toolbar);
 
-        mCarList = findViewById(R.id.car_list_rw);
+        RecyclerView mCarList = findViewById(R.id.car_list_rw);
 
 
         // TODO: 24/03/2018 remove this
         setupTestList();
 
-        CarListAdapter adapter = new CarListAdapter(testList, this);
+        CarListAdapter adapter = new CarListAdapter(this.mCarList, this);
         mCarList.setAdapter(adapter);
         mCarList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
@@ -61,17 +58,18 @@ public class CarListActivity extends AppCompatActivity implements OnItemClickLis
 
     // TODO: 24/03/2018 remove this
     private void setupTestList() {
-        testList = new ArrayList<>();
+        mCarList = new ArrayList<>();
 
-        testList.add(new Car("Mercedes-Benz", "A 180", "13600.00", "2017", "17000", ""));
-        testList.add(new Car("Audi", "A1 1.6 TDI Sportback S tronic", "13600.00", "2017", "17000", ""));
-        testList.add(new Car("Opel", "Corsa 1.3 CDTI Enjoy Start/Stop", "245000", "2017", "17000", ""));
-        testList.add(new Car("BMW", "530 Serie 5 (F10/F11) xDrive 249CV Touring Msport", "13600.00", "2017", "17000", ""));
+        mCarList.add(new Car("Mercedes-Benz", "A 180", "13600.00", "2017", "17000", "https://secure.pic.autoscout24.net/images-420x315/026/186/0339186026001.jpg?f3f3a7b0090d280007f6ec077b42b1d2"));
+        mCarList.add(new Car("Audi", "A1 1.6 TDI Sportback S tronic", "13600.00", "2017", "17000", "https://secure.pic.autoscout24.net/images-420x315/409/487/0340487409001.jpg?2ae5ec0b72c59be66c23cdfb060c460a"));
+        mCarList.add(new Car("Opel", "Corsa 1.3 CDTI Enjoy Start/Stop", "245000", "2017", "17000", "https://secure.pic.autoscout24.net/images-420x315/883/098/0339098883001.jpg?649620d232904569218eda9c94d216c8"));
+        mCarList.add(new Car("BMW", "530 Serie 5 (F10/F11) xDrive 249CV Touring Msport", "13600.00", "2017", "17000", "https://secure.pic.autoscout24.net/image-is-broken"));
     }
 
     @Override
     public void onItemClick(Car car) {
         Intent intent = new Intent(this, CarDetailsActivity.class);
+        intent.putExtra(CarDetailsActivity.CAR_EXTRAS, car);
         startActivity(intent);
         overridePendingTransition(R.anim.anim_slide_in_left, R.anim.anim_slide_out_left);
     }
@@ -107,12 +105,6 @@ public class CarListActivity extends AppCompatActivity implements OnItemClickLis
             return 0;
         }
 
-// TODO: 24/03/2018 remove this
-//        void swapCars(List<String> newList) {
-//            mCarList = newList;
-//            notifyDataSetChanged();
-//        }
-
         class CarHolder extends RecyclerView.ViewHolder {
             private ImageView mThumbnail;
             private TextView mMake;
@@ -128,19 +120,24 @@ public class CarListActivity extends AppCompatActivity implements OnItemClickLis
             }
 
             void bind(final Car car, final OnItemClickListener listener) {
-                // TODO: 24/03/2018 load image from the internet
-                mThumbnail.setImageDrawable(ContextCompat.getDrawable(mThumbnail.getContext(), R.drawable.delete_this_img));
-//                mThumbnail.invalidate();
+                loadCarImage(car.getPictureUrl(), mThumbnail);
                 mMake.setText(car.getMake());
                 mModel.setText(car.getModel());
                 mPrice.setText(car.getPrice());
 
-                itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        listener.onItemClick(car);
-                    }
-                });
+                itemView.setOnClickListener(v -> listener.onItemClick(car));
+            }
+
+            void loadCarImage(String url, ImageView imageView) {
+                if (url.isEmpty()) {
+                    imageView.setImageResource(R.drawable.ic_car_placeholder_error);
+                } else {
+                    Picasso.get()
+                            .load(url)
+                            .placeholder(R.drawable.ic_car_placeholder)
+                            .error(R.drawable.ic_car_placeholder_error)
+                            .into(imageView);
+                }
             }
         }
     }

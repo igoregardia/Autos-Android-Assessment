@@ -20,8 +20,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/car_details_img_height"
                 android:layout_gravity="center"
-                android:scaleType="centerCrop"
-                android:src="@drawable/delete_this_img" />
+                android:scaleType="centerCrop" />
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -97,7 +96,6 @@
                     android:layout_toEndOf="@+id/car_make"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    android:text="2007"
                     android:textColor="@color/textColorSecondary"
                     android:textSize="@dimen/text_size_default" />
 

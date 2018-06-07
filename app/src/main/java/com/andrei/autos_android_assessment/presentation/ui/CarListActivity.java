@@ -110,7 +110,7 @@ public class CarListActivity extends MvpActivity<CarListPresenter> implements Ca
             mCarList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
             mCarList.addItemDecoration(mItemDecor);
         } else {
-            mCarList.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
+            mCarList.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
             mCarList.removeItemDecoration(mItemDecor);
         }
         mCarList.setAdapter(mListAdapter);

@@ -12,9 +12,10 @@ import android.widget.TextView;
 
 import com.andrei.autos_android_assessment.R;
 import com.andrei.autos_android_assessment.domain.data.model.Car;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 /**
  * Created by Andrei on 24/03/2018.
@@ -68,28 +69,38 @@ public class CarDetailsActivity extends AppCompatActivity {
     }
 
     void loadCarImage(String url, ImageView imageView) {
-        if (url.isEmpty()) {
-            imageView.setImageResource(R.drawable.ic_car_placeholder_error);
-        } else {
-            Picasso.get()
-                    .load(url)
-                    .networkPolicy(NetworkPolicy.OFFLINE)
-                    .into(imageView, new Callback() {
-                        @Override
-                        public void onSuccess() {
-
-                        }
-
-                        @Override
-                        public void onError(Exception e) {
-                            Picasso.get()
-                                    .load(url)
-                                    .placeholder(R.drawable.ic_car_placeholder)
-                                    .error(R.drawable.ic_car_placeholder_error)
-                                    .into(imageView);
-                        }
-                    });
-        }
+//        if (url.isEmpty()) {
+//            imageView.setImageResource(R.drawable.ic_car_placeholder_error);
+//        } else {
+//            Picasso.get()
+//                    .load(url)
+//                    .networkPolicy(NetworkPolicy.OFFLINE)
+//                    .into(imageView, new Callback() {
+//                        @Override
+//                        public void onSuccess() {
+//
+//                        }
+//
+//                        @Override
+//                        public void onError(Exception e) {
+//                            Picasso.get()
+//                                    .load(url)
+//                                    .placeholder(R.drawable.ic_car_placeholder)
+//                                    .error(R.drawable.ic_car_placeholder_error)
+//                                    .into(imageView);
+//                        }
+//                    });
+//        }
+        Glide.with(this)
+                .load(url)
+                .apply(new RequestOptions()
+                        .fallback(R.drawable.ic_car_placeholder_error)
+                        .error(R.drawable.ic_car_placeholder_error)
+                )
+//                .transition(new GenericTransitionOptions<>())
+                .transition(withCrossFade(200))
+                .thumbnail(0.1f)
+                .into(imageView);
     }
 
     @Override

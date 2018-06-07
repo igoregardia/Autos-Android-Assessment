@@ -63,6 +63,9 @@ public class CarListPresenter extends MvpBasePresenter<CarListView> {
 
     private void onSuccess(List<Car> cars) {
         if (isAttached()) {
+            // TODO: 26/03/2018 remove this
+            cars.get(0).setPictureUrl("https://preview.c9users.io/carparked/backend_assets/carparked/4k_wallpaper.jpg?_c9_id=livepreview0&_c9_host=https://ide.c9.io");
+            cars.get(1).setPictureUrl(null);
             getView().onLoadCars(cars);
         }
     }
